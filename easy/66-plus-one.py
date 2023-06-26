@@ -1,5 +1,6 @@
 """
-This was a fun one. I was apparently not familiar with Pythons actual behavior around reversing lists, so this was a good exercise.
+This was a fun one. I was apparently not familiar with Pythons actual behavior
+around reversing lists, so this was a good exercise.
 """
 
 class Solution:
