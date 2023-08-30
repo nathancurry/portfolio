@@ -1,0 +1,40 @@
+---
+# tasks file for autoredis-cluster-join
+- name: Stat and register cluster lockfile
+  stat:
+    path: /var/local/autoredis/cluster.lock
+  register: cluster_lock
+
+- name: create lock directory
+  file:
+    path: /var/local/autoredis
+    state: directory  
+- name: debug
+  debug:
+    var: cluster_lock
+
+
+- name: Send rladmin command to bootstrap master node
+  command: '/opt/redislabs/bin/rladmin cluster create name {{ cluster_fqdn}} addr {{ ansible_host }} username "{{ cluster_username }}" password "{{ cluster_password }}"'
+  when:
+    - node_is_master is defined 
+    - cluster_lock.stat.exists == false
+
+
+- name: Send rladmin command join slaves to RS cluster
+  command: "/opt/redislabs/bin/rladmin cluster join addr {{ ansible_host }}  nodes {{ hostvars[groups[cluster_name][0]]['ansible_host'] }} username {{ cluster_username }} password {{ cluster_password }}"
+  when:
+    - node_is_master is undefined 
+    - cluster_lock.stat.exists == false
+
+- name: Set quorum_only
+  command: '/opt/redislabs/bin/rladmin tune node 1 quorum_only enabled'
+  when:
+    - node_is_master is defined
+    - quorum_only is defined
+    - cluster_lock.stat.exists == false
+
+- name: create cluster lockfile 
+  file:
+    state: touch
+    path: /var/local/autoredis/cluster.lock

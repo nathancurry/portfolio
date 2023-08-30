@@ -1,0 +1,22 @@
+---
+# tasks file for autoredis-terraform
+
+- import_tasks: init.yml
+  tags:
+    - init
+    - terraform
+    - all
+    - never
+
+- import_tasks: apply.yml
+  tags:
+    - apply
+    - terraform
+    - all
+    - never
+
+- import_tasks: destroy.yml
+  tags:
+    - destroy
+    - delete
+    - never

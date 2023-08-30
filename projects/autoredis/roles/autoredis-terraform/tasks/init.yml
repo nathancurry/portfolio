@@ -1,0 +1,18 @@
+---
+# autoredis-terraform: init.yml
+
+- name: copy inventory template
+  copy:
+    src: "inventory_template"
+    dest: "{{ deployment_directory }}/inventory_template"
+
+- name: template main.tf
+  template:
+    src: "aws.tf"
+    dest: "{{ deployment_directory }}/main.tf"
+
+- name: "terraform init"
+  command: terraform init
+  args:
+    chdir: "{{ deployment_directory }}"
+    creates: "{{ deployment_directory }}/.terraform.lock.hcl"

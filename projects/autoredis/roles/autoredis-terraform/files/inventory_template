@@ -1,0 +1,4 @@
+[${ cluster_name }]
+%{ for index, name in hostname ~}
+node${ index +1 } ansible_host=${ private_ip[index] } ansible_user=${ ansible_user } %{ if index == 0 }node_is_master=true ${ quorum_node == "True" ? "quorum_only=true" : "" }%{ endif }
+%{ endfor ~}

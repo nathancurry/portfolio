@@ -1,0 +1,20 @@
+---
+# tasks file for autoredis-addhosts
+- name: Add new hosts to active inventory
+  add_host:
+    hostname: "{{ item.0 }}"
+    groups: "{{ deployment_name }}"
+    ansible_host: "{{ item.1 }}"
+    ansible_port: "22"
+    inventory_dir: "{{ deployment_directory }}"
+    ansible_user: "{{ aws_host_login }}"
+  with_together:
+    - "{{ terraform_outputs.outputs.node_names.value }}"
+    - "{{ terraform_outputs.outputs.private_ips.value }}"
+
+- name: Refresh inventory
+  meta: refresh_inventory
+
+- name: "Pause for {{ pause_duration }} seconds"
+  pause:
+    seconds: "{{ pause_duration }}"

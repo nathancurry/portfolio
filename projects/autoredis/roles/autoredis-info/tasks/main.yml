@@ -1,0 +1,52 @@
+---
+# tasks file for autoredis-info
+
+- name: Stat A records
+  stat:
+    path: "{{ deployment_directory }}/create_A_results.json"
+  register: stat_a_records
+
+- name: Stat NS records
+  stat:
+    path: "{{ deployment_directory }}/create_NS_results.json"
+  register: stat_ns_records
+
+# - name: Stat Terraform
+#   stat: 
+#     path: "{{ deployment_directory }}/terraform.tfstate"
+#   register: stat_terraform
+
+# - name: Set Terraform fact
+#   set_fact:
+#     terraform_json: "{{ lookup('file','{{ deployment_directory }}/terraform.tfstate', errors='ignore') | default('{}') | from_json }}"
+#   when: stat_terraform.stat.exists == true
+
+# - name: debug tf
+#   debug:
+#     var: terraform_json
+
+- name: Print info 
+  debug:
+    msg: |
+
+      Terraform: {{ "good" if cluster_name in groups and groups[cluster_name] else "missing" }}
+      DNS:       {{ "good" if (stat_a_records.stat.exists == true) and (stat_ns_records.stat.exists == true) else "missing"  if (stat_a_records.stat.exists == false) or (stat_ns_records.stat.exists == false)}}
+
+      CLUSTER INFO
+      ------------
+      Name: {{ cluster_name }}
+      Redis {{ redis_version }}-{{ redis_build }} on {{ redis_distro | upper }}
+      FQDN: {{ cluster_fqdn }}
+      Node count: {{ cluster_node_count }}
+      Quorum node: {{ "true" if cluster_quorum_node is true else "false" }}
+
+      AWS key name: {{ aws_key_name }}
+      
+      {% if cluster_name in groups and groups[cluster_name] %}
+      NODES:
+      {% for node in groups[cluster_name] %}
+      {{ hostvars[node]['inventory_hostname'] }}.{{ cluster_fqdn }} {{ hostvars[node]['ansible_host'] }} {{ "[MASTER]" if hostvars[node]['node_is_master'] is defined }}
+      {% endfor %}
+      {% else %}
+      CLUSTER NOT DEPLOYED
+      {% endif %} 

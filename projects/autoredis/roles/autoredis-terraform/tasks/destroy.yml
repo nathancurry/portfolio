@@ -1,0 +1,12 @@
+---
+# autoredis-terraform: destroy.yml
+
+- name: terraform destroy
+  terraform:
+    project_path: "{{ deployment_directory }}"
+    state: absent
+  register: terraform_outputs
+
+- name: debug tf outputs
+  debug:
+    var: terraform_outputs

@@ -1,0 +1,5 @@
+ignore_swap=no
+systune=yes
+ntp=yes
+firewall=no
+rlcheck=yes
