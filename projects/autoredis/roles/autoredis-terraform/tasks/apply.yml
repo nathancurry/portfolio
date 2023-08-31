@@ -1,0 +1,8 @@
+---
+# autoredis-terraform: apply.yml
+
+- name: "terraform apply"
+  terraform:
+    project_path: "{{ deployment_directory }}"
+    state: present
+  register: terraform_outputs

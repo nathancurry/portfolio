@@ -1,0 +1,60 @@
+---
+# tasks file for autoredis-cluster-firstboot
+- name: Stat and register firstboot lockfile
+  stat:
+    path: /var/local/autoredis/firstboot.lock
+  register: firstboot
+
+- name: add local port range
+  sysctl:
+    name: "net.ipv4.ip_local_port_range"
+    value: "30000 65535"
+    state: present
+    sysctl_file: /etc/sysctl.d/50-autoredis.conf
+    reload: yes
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "swap"
+    state: absent
+
+- name: Include tasks for Ubuntu 18.04
+  include_tasks: bionic.yml
+  when: redis_distro == "bionic"
+
+# - name: Include tasks for Ubuntu 16.04
+#   include_tasks: xenial.yml
+#   when: redis_distro == "xenial"
+
+# - name: Include tasks for RHEL7
+#   include_tasks: rhel7.yml
+#   when: redis_distro == "rhel7"
+
+# - name: Include tasks for RHEL8
+#   include_tasks: rhel8.yml
+#   when: redis_distro == "rhel8"
+
+- block:
+  - name: install packages
+    package:
+      name: '*'
+      state: latest
+    when: 
+    - cluster_firstboot_reboot == true
+
+  - name: Reboot on package update
+    reboot:
+    when: 
+    - cluster_firstboot_reboot == true
+
+  - name: Create lock directory
+    file:
+      path: /var/local/autoredis/
+      state: directory
+
+  - name: create firstboot lockfile 
+    file:
+      state: touch
+      path: /var/local/autoredis/firstboot.lock
+  when:
+  - firstboot.stat.exists == false

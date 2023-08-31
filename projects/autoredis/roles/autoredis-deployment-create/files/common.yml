@@ -1,0 +1,48 @@
+---
+# aws_owner_tag:  # Set to your redis email
+aws_key_name: "keyname" # keypair name on AWS. Place key at deployments/keys/<key>.pem
+
+### DNS RECORDS ####
+####################
+
+# Build DNS into Terraform Template
+
+### RHEL RELEASE ###
+####################
+
+rhel7_release: 7.9 
+rhel8_release: 8.5
+
+
+### OTHER DEFAULTS #################################
+### mostly don't change anything below this line ###
+####################################################
+
+pause_duration: "{{ '20' if redis_distro=='rhel7' else '30' if redis_distro=='rhel8' else '15' }}"
+
+deployment_directory: "deployments/{{ deployment_name }}"
+
+# These are us-east-1
+aws_bionic_ami: ami-00ddb0e5626798373
+aws_xenial_ami: ami-0b0ea68c435eb488d
+aws_rhel7_ami: ami-011939b19c6bd1492 # CentOS 7, set release with rhel7_release
+aws_rhel8_ami: ami-098bb5d92c8886ca1 # Rocky Linux 8.4, set release with rhel8_release
+
+# CentOS 7 - https://aws.amazon.com/marketplace/pp/prodview-foff247vr2zfw
+# Rocky 8  - https://aws.amazon.com/marketplace/pp/prodview-2otariyxb3mqu
+
+aws_instance_ami: "{{ lookup('vars', 'aws_' + redis_distro + '_ami')  }}"
+aws_instance_type: t3.medium
+aws_vpc: ""
+aws_security_group: ""
+aws_subnets:
+  - ""
+  - ""
+
+
+### GENERATED VARS
+aws_host_login: "{{ 'centos' if redis_distro=='rhel7' else 'ec2-user' if redis_distro=='rhel8' else 'ubuntu' if (redis_distro=='bionic' or redis_distro=='xenial') }}"
+
+redis_arch: "{{ 'x86_64' if redis_distro.startswith('rhel') else 'amd64' }}"
+redis_archive_name: "redislabs-{{ redis_version }}-{{ redis_build }}-{{ redis_distro }}-{{ redis_arch }}.tar"
+redis_download_url: "https://s3.amazonaws.com/redis-enterprise-software-downloads/{{ redis_version }}/{{ redis_archive_name }}"

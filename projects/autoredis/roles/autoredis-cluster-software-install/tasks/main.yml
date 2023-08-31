@@ -1,0 +1,29 @@
+---
+# tasks file for autoredis-cluster-software-install
+- name: place answers file
+  template:
+    src: answers.txt
+    dest: /root/answers.txt
+
+- name: fetch RS tgz from S3 url
+  get_url:
+    url: "{{ redis_download_url }}"
+    dest: "/root/{{ redis_archive_name }}"
+
+- name: untar RS tgz
+  unarchive:
+    src: "/root/{{ redis_archive_name }}"
+    dest: "/root/"
+    remote_src: yes
+
+- name: execute RS installation
+  shell: ./install.sh -c answers.txt
+  args:
+    chdir: /root
+    creates: /var/opt/redislabs/log/install.log
+
+- name: add main user to redislabs group
+  user:
+    name: "{{ ansible_user }}"
+    groups: "redislabs"
+    

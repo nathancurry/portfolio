@@ -1,0 +1,37 @@
+---
+# tasks file for autoredis-manage
+- name: create common directory
+  file:
+    path: "deployments/common"
+    state: directory
+
+- name: copy common vars
+  copy:
+    src: "common.yml"
+    dest: "deployments/common/vars.yml"
+    force: no
+
+- name: create keys directory
+  file:
+    path: "deployments/common/keys"
+    mode: 0750
+    state: directory
+
+- name: create deployment directory
+  file:
+    path: "{{ deployment_directory }}"
+    state: directory
+
+- name: copy lab vars
+  copy:
+    src: "deployment.yml"
+    dest: "{{ deployment_directory }}/vars.yml"
+    force: no
+
+- name: insert deployment_name
+  lineinfile:
+    regexp: "^[#]?deployment_name:.*$"
+    state: present
+    line: "deployment_name: {{ deployment_name }}"
+    path: "{{ deployment_directory }}/vars.yml"
+

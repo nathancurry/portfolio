@@ -1,0 +1,84 @@
+#####################
+### REQUIRED VARS ###
+#####################
+
+#deployment_name:
+
+# LOCK
+# Set this to "true" once you've filled out this top section
+deploy_ready: false
+
+# Will render name in AWS: <node_name>-<index>
+aws_node_name: "{{ deployment_name }}"
+
+# Cluster FQDN
+cluster_name: "{{ deployment_name }}"
+cluster_domain: lab.example.com
+cluster_fqdn: "{{ cluster_name }}.{{ cluster_domain }}"
+
+# Node ID and access
+# SET IN "deployments/common/vars.yml"
+# aws_owner_tag: "@example.com" 
+# aws_key_name: "keyname" # keypair name on AWS. Place key at deployments/keys/<key>.pem
+
+# Cluster credentials
+cluster_username: "demo@example.com"
+cluster_password: "demo"
+
+
+### CLUSTER CUSTOMIZATION ###
+#############################
+cluster_node_count: 3
+cluster_quorum_node: no
+
+# AZ NOT IMPLEMENTED
+# cluster_az1_node_count: 0
+# cluster_az2_node_count: 0
+# cluster_az3_node_count: 0
+# cluster_az4_node_count: 0
+# cluster_az5_node_count: 0
+# cluster_az6_node_count: 0
+
+
+### SOFTWARE VERSION ###
+########################
+# The values below render 6.2.8-39
+redis_version: "6.2.8"
+redis_build: "39"
+redis_distro: bionic # bionic, xenial, rhel7, rhel8
+
+### OTHER DEFAULTS ##################
+### OVERRIDES FOR THE COMMON VARS ###
+#####################################
+
+### RHEL VERSION ###
+####################
+
+# rhel7_version: 7.9
+# rhel8_version: 8.5
+
+# pause_duration: 15
+
+# deployment_directory: "deployments/{{ deployment_name }}"
+
+# aws_bionic_ami: ami-00ddb0e5626798373
+# aws_xenial_ami: ami-0b0ea68c435eb488d
+# aws_rhel7_ami: ami-011939b19c6bd1492 # CentOS 7, set release with rhel7_release
+# aws_rhel8_ami: ami-098bb5d92c8886ca1 # Rocky Linux 8.4, set release with rhel8_release
+
+# # CentOS 7 - https://aws.amazon.com/marketplace/pp/prodview-foff247vr2zfw
+# # Rocky 8  - https://aws.amazon.com/marketplace/pp/prodview-2otariyxb3mqu
+
+# aws_instance_ami: "{{ lookup('vars', 'aws_' + redis_distro + '_ami')  }}"
+# aws_instance_type: t3.medium
+# aws_vpc: ""
+# aws_security_group: ""
+# aws_subnets:
+#   - ""
+
+# ### GENERATED VARS
+# aws_host_login: "{{ 'centos' if redis_distro=='rhel7' else 'ec2-user' if redis_distro=='rhel8' else 'ubuntu' if (redis_distro=='bionic' or redis_distro=='xenial') }}"
+
+# redis_arch: "{{ 'x86_64' if redis_distro.startswith('rhel') else 'amd64' }}"
+# redis_archive_name: "redislabs-{{ redis_version }}-{{ redis_build }}-{{ redis_distro }}-{{ redis_arch }}.tar"
+# redis_download_url: "https://s3.amazonaws.com/redis-enterprise-software-downloads/{{ redis_version }}/{{ redis_archive_name }}"

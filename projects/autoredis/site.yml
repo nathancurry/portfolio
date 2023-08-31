@@ -1,0 +1,91 @@
+---
+- name: Manage infrastructure
+  hosts: localhost
+  strategy: linear
+  gather_facts: false
+
+  vars_files:
+    - deployments/common/vars.yml
+
+  pre_tasks:
+  - name: Fail if vars not edited
+    fail:
+      msg: |
+        Set aws_owner_tag in deployments/common/vars.yml. Then, edit your
+        vars file at{{ deployment_directory }}/vars.yml, then set 'deploy_ready: true'"
+    when: deploy_ready == false or aws_owner_tag is undefined 
+
+  roles:
+  - role: autoredis-terraform
+
+  post_tasks:
+  - name: Add hosts for 'all' tag
+    include_role:
+      name: autoredis-add-hosts
+    tags:
+    - all
+    - never
+
+  # - name: Import autoredis-dns
+  #   import_role:
+  #     name: autoredis-dns
+
+
+- name: Bootstrap nodes and install cluster software
+  hosts: all
+  strategy: free
+  become: yes
+  become_method: sudo
+  gather_facts: false
+
+  vars_files:
+    - deployments/common/vars.yml
+
+  roles:
+  - role: autoredis-cluster-firstboot
+    tags:
+    - firstboot
+    - cluster
+    - all
+    - never
+
+  - role: autoredis-cluster-software-install
+    tags:
+    - install
+    - cluster
+    - all
+    - never
+
+- name: Create and join cluster
+  hosts: all
+  strategy: linear
+  order: sorted
+  become: yes
+  become_method: sudo
+  gather_facts: false
+
+
+  vars_files:
+    - deployments/common/vars.yml
+
+  roles:
+  - role: autoredis-cluster-config
+    tags:
+    - config
+    - cluster
+    - all
+    - never
+
+- name: Get cluster info
+  hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - deployments/common/vars.yml
+
+  roles:
+  - role: autoredis-info
+    tags:
+    - all
+    - always
+    - info

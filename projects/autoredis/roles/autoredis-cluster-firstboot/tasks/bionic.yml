@@ -1,0 +1,19 @@
+
+- name: Disable Stub Listener
+  lineinfile:
+    line: DNSStubListener=no
+    regexp: "^[#]?DNSStubListener=.*$"
+    path: /etc/systemd/resolved.conf
+
+- name: Update link
+  file:
+    path: /etc/resolv.conf
+    state: link
+    src: /run/systemd/resolve/resolv.conf
+
+- name: Restart service
+  service:
+    name: systemd-resolved
+    state: restarted
+
+
