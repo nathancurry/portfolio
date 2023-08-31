@@ -1,4 +1,4 @@
-from turtle import Turtle, Screen
+from turtle import Screen
 from time import sleep
 from player import Player
 from traffic import Traffic
